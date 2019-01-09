@@ -4,7 +4,18 @@ I hope this is suitable for your review. If I missed the brief completely, or ha
 
 ## Getting Started:
 - Run `docker run -d --name=dynamodb-local -p 8200:8000 amazon/dynamodb-local` (use `docker rm -f dynamodb-local` to remove afterwards)
+- Navigate to the API folder
 - Run `npm install` in the API folder to install dependencies
+- Set the process env variables required
+```
+export API_PORT="3000"
+export AWS_ACCESS_KEY_ID="MyAccessKeyId"
+export AWS_SECRET_ACCESS_KEY="mySecretkey"
+export DYNAMODB_IS_OFFLINE="true"
+export DYNAMODB_TABLE="demoReadings"
+export SHARED_SECRET="shared-secret"
+```
+- Run `npm start` to start the service
 - Optionally run `npm test` to execute the test suite
 
 ## Initial Notes
