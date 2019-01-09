@@ -24,10 +24,9 @@ module.exports = {
             }]);
         }
 
-        // create a hash from the data to uniquely identify this data
-        let hasher = crypto.createHash("md5");
-        hasher.update(`${context.customerId}|${reading.serialNumber}|${readingDate.unix()}`);
-        let readingId = hasher.digest("base64");
+        // create a hash from the data to uniquely identify this data, use base36 as we want a URL happy id
+        let hasher = require("hash36");
+        let readingId = hasher.md5(`${context.customerId}|${reading.serialNumber}|${readingDate.unix()}`)
 
         // Set the metadata and derived properties
         reading.id = readingId;
@@ -93,8 +92,6 @@ module.exports = {
         if (failures.length){
             throw new errors.ValidationError(failures);
         }
-
-
 
         return await repo.queryReadingsAsync(context.customerId, fromDate.toISOString(), toDate.toISOString());
     }

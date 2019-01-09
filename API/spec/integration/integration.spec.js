@@ -32,11 +32,11 @@ describe("integration tests / ", function(){
     let customer1Jwt = createNewJwt();
     let customer2Jwt = createNewJwt();
 
-    // let customer1Jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4LnN0ZXZlbnMiLCJuYW1lIjoiQWxleCBTdGV2ZW5zIiwiaWF0IjoxNTE2MjM5MDIyLCJjdXN0b21lcklkIjoiY3VzdG9tZXIxMjMifQ.w1HaGMsth83_1aLNVMZwcQTIiEOK_BUeENYtDTc3qbM";
-    // let customer2Jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiaWxseS50d2VsdmV0cmVlcyIsIm5hbWUiOiJCaWxseSBUd2VsdmV0cmVlcyIsImlhdCI6MTUxNjIzOTAyMiwiY3VzdG9tZXJJZCI6ImN1c3RvbWVyNDU2In0.kcEnZJrNehoHplRfckR2EM_8j4sZeQjCNDJN4OK-l44";
+    console.log(`customer1Jwt - ${customer1Jwt}`);
+    console.log(`customer2Jwt - ${customer2Jwt}`);
 
     port = process.env.PORT;
-    let baseUrl = `http://localhost:${port}/api/v1/meter-read/`;
+    let baseUrl = `http://localhost:${port}/api/v1/meter-read`;
 
     describe("meter-read tests / ", function(){
 
@@ -69,8 +69,9 @@ describe("integration tests / ", function(){
             //Check they are different!
             expect(customer1Jwt).not.toEqual(customer2Jwt);
 
+            let url = `${baseUrl}?from=2019-01-01T10:00:00Z&to=2019-02-01T00:00:00Z`;
             let response = await request.getAsync({
-                url: `${baseUrl}`,
+                url: url,
                 auth: {
                     bearer: customer1Jwt
                 },
@@ -81,7 +82,7 @@ describe("integration tests / ", function(){
             expect(response.body.length).toEqual(0);
 
             response = await request.getAsync({
-                url: `${baseUrl}`,
+                url: url,
                 auth: {
                     bearer: customer2Jwt
                 },
@@ -118,7 +119,7 @@ describe("integration tests / ", function(){
 
             let readingId = response.body.id;
             response = await request.getAsync({
-                url: `${baseUrl}${readingId}`,
+                url: `${baseUrl}/${readingId}`,
                 auth: {
                     bearer: customer1Jwt
                 },
@@ -127,14 +128,14 @@ describe("integration tests / ", function(){
 
             expect(response.statusCode).toBe(200);
             expect(response.body.id).toEqual(readingId);
-
             done();
-        }); 
+        });
 
         it("should return a value for token1, but an empty array for token2", async (done) => {
             
+            let url = `${baseUrl}?from=2019-01-01T10:00:00Z&to=2019-02-01T00:00:00Z`;
             let response = await request.getAsync({
-                url: `${baseUrl}`,
+                url: url,
                 auth: {
                     bearer: customer1Jwt
                 },
@@ -145,7 +146,7 @@ describe("integration tests / ", function(){
             expect(response.body.length).toEqual(1);
 
             response = await request.getAsync({
-                url: `${baseUrl}`,
+                url: url,
                 auth: {
                     bearer: customer2Jwt
                 },
