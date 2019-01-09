@@ -15,7 +15,7 @@ module.exports = {
      */
     async addReadingAsync(context, reading){
 
-        // create a hash from the data to uniquely identify this data
+        // Validate the readDate
         let readingDate = moment(reading.readDate);
         if (!readingDate.isValid()){
             throw new errors.ValidationError([{
@@ -24,11 +24,12 @@ module.exports = {
             }]);
         }
 
+        // create a hash from the data to uniquely identify this data
         let hasher = crypto.createHash("md5");
-        
-        hasher.update(`${reading.customerId}|${reading.serialNumber}|${readingDate.unix()}`);
+        hasher.update(`${context.customerId}|${reading.serialNumber}|${readingDate.unix()}`);
         let readingId = hasher.digest("base64");
-        
+
+        // Set the metadata and derived properties
         reading.id = readingId;
         reading.customerId = context.customerId;
         reading.readDate = readingDate.toISOString();
@@ -60,8 +61,42 @@ module.exports = {
      * @param {String?} from - ISO date string to query from
      * @param {String?} to -  ISO date string to query to
      */
-    async getReadingsAsync(context, from, to){
-        return await repo.queryReadingsAsync(context.customerId, from, to);
+    async queryReadingsAsync(context, from, to){
+
+        let failures = [];
+
+        let fromDate = moment(from);
+        if (!fromDate.isValid()){
+            failures.push({
+                parameter: "from",
+                message: "Dates must be provided in a valid ISO format"
+            })
+        }
+
+        let toDate = moment(to);
+        if (!toDate.isValid()){
+            failures.push({
+                parameter: "to",
+                message: "Dates must be provided in a valid ISO format"
+            })
+        }
+
+        if (!failures.length){
+            if (fromDate.isAfter(toDate)){
+                failures.push({
+                    parameter: "from",
+                    message: "The 'from' date, must come before the 'to' date"
+                })
+            }
+        }
+
+        if (failures.length){
+            throw new errors.ValidationError(failures);
+        }
+
+
+
+        return await repo.queryReadingsAsync(context.customerId, fromDate.toISOString(), toDate.toISOString());
     }
 
 }

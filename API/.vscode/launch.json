@@ -18,7 +18,8 @@
                 "AWS_ACCESS_KEY_ID": "MyAccessKeyId",
                 "AWS_SECRET_ACCESS_KEY": "mySecretkey",
                 "DYNAMODB_IS_OFFLINE": "true",
-                "DYNAMODB_TABLE": "demoReadings"
+                "DYNAMODB_TABLE": "demoReadings",
+                "SHARED_SECRET": "shared-secret"
             }
         },
         {
@@ -35,7 +36,8 @@
                 "AWS_ACCESS_KEY_ID": "MyAccessKeyId",
                 "AWS_SECRET_ACCESS_KEY": "mySecretkey",
                 "DYNAMODB_IS_OFFLINE": "true",
-                "DYNAMODB_TABLE": "demoReadings"
+                "DYNAMODB_TABLE": "demoReadings",
+                "SHARED_SECRET": "shared-secret"
             }
         }
     ]

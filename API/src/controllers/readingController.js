@@ -4,6 +4,7 @@ let commands = require("../domain/readingCommands.js");
 
 function mapResult(result){
     // Remove any internal fields here
+    delete result.customerId;
     return result;
 }
 
@@ -13,20 +14,23 @@ module.exports = {
         commands.addReadingAsync(req.context, req.body)
             .then((result) => {
                 return res.json(mapResult(result));
-            }).catch(next);
+            })
+            .catch(next);
     },
 
     getReading(req, res, next){
         commands.getReadingAsync(req.context, req.params.readingId)
             .then((result) => {
                 return res.json(mapResult(result));
-            }).catch(next);
+            })
+            .catch(next);
     },
 
     getAllReadings(req, res, next){
-        commands.getReadingsAsync(req.context, req.params.from, req.params.to)
+        commands.queryReadingsAsync(req.context, req.query.from, req.query.to)
             .then((result) => {
                 return res.json(result.map(mapResult));
-            }).catch(next);        
+            })
+            .catch(next);
     }
 }

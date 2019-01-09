@@ -30,5 +30,7 @@ module.exports = (err, req, res, next) => {
         return res.sendStatus(409);
     }
 
+    // Would normally log here to a logging DB / stack
+    console.log(err); 
     return res.sendStatus(500);
 }

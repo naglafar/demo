@@ -39,7 +39,7 @@ describe("readingCommands tests / ", function(){
             };
         })
 
-        it("should handle invalid readDates", async (done) => {
+        it("should validate an invalid readDate", async (done) => {
             
             mockRepo.addReadingAsync = async () => fail("should not reach this point");
 
@@ -79,22 +79,25 @@ describe("readingCommands tests / ", function(){
         it("should generate a unique hash and set the id", async (done) => {
             
             let savedIds = [];
-            mockRepo.addReadingAsync = async (reading) => savedIds.push(reading.id);
+            mockRepo.addReadingAsync = async (reading) => {
+                savedIds.push(reading.id)
+                return reading;
+            };
 
-            defaultReading.customerId = "customer456";
             await target.addReadingAsync(mockContext, defaultReading);
 
             defaultReading.serialNumber = "serialNumber2";
             await target.addReadingAsync(mockContext, defaultReading);
 
             defaultReading.readDate = "2019-01-09T18:00:00+00:00"; // Day later
-            await target.addReadingAsync(mockContext, defaultReading);
+            let result = await target.addReadingAsync(mockContext, defaultReading);
 
             // Validate that each id is different
             expect(savedIds.length).toEqual(3);
             expect(savedIds[0]).not.toEqual(savedIds[1]);
             expect(savedIds[0]).not.toEqual(savedIds[2]);
             expect(savedIds[1]).not.toEqual(savedIds[2]);
+            expect(result).toBe(defaultReading);
             done();
         }); 
 
@@ -124,13 +127,100 @@ describe("readingCommands tests / ", function(){
     
         it("should retrieve a reading from the repo based on it's id when the context.customerId matches", async (done) => {
             
+            let reading = {
+                customerId: mockContext.customerId,
+                id: "myReadingId"
+            };
+
+            mockRepo.getReadingAsync = async (id) => {
+                expect(id).toEqual(reading.id);
+                return reading;
+            }
+
+            let result = await target.getReadingAsync(mockContext, reading.id);
+            expect(result).toBe(reading);
             done();
         });
 
         it("should raise a NotAuthorisedError when retrieving a reading that does not belong to the customerId in context", async (done) => {
             
-            done();
+            
+            let reading = {
+                customerId: "notTheSameAsInContext",
+                id: "myReadingId"
+            };
+
+            mockRepo.getReadingAsync = async (id) => {
+                expect(id).toEqual(reading.id);
+                return reading;
+            }
+
+            try {
+                await target.getReadingAsync(mockContext, reading.id);
+            } catch (err) {
+                expect(err.name).toEqual("NotAuthorisedError");
+                done();
+            }
         }); 
+    
+    });
+
+    describe("queryReadingsAsync tests / ", function(){
+    
+        it("should handle invalid dates", async (done) => {
+            
+            let fromDate = "2019-14-08T18:00:00+00:00";
+            let toDate = "2019-12-56T18:00:00+00:00";
+
+            try {
+                await target.queryReadingsAsync(mockContext, fromDate, toDate);
+            } catch (err) {
+                expect(err.name).toEqual("ValidationError");
+                expect(err.failures.length).toEqual(2);
+                expect(err.failures[0].parameter).toEqual("from");
+                expect(err.failures[0].message).toEqual("Dates must be provided in a valid ISO format");
+                expect(err.failures[1].parameter).toEqual("to");
+                expect(err.failures[1].message).toEqual("Dates must be provided in a valid ISO format");
+                done();
+            }
+            
+        }); 
+
+        it("should handle the to date being before the from date", async (done) => {
+            
+            let fromDate = "2019-01-01T00:00:00.000Z";
+            let toDate = "2010-07-01T00:00:00.000Z";
+
+            try {
+                await target.queryReadingsAsync(mockContext, fromDate, toDate);
+            } catch (err) {
+                expect(err.name).toEqual("ValidationError");
+                expect(err.failures.length).toEqual(1);
+                expect(err.failures[0].parameter).toEqual("from");
+                expect(err.failures[0].message).toEqual("The 'from' date, must come before the 'to' date");
+                done();
+            }
+            
+        }); 
+
+
+        it("should return the values from the repo call", async (done) => {
+            
+            let readings = [];
+            let fromDate = "2019-01-01T00:00:00.000Z";
+            let toDate = "2019-07-01T00:00:00.000Z";
+
+            mockRepo.queryReadingsAsync = async (customerId, from, to) => {
+                expect(customerId).toEqual(mockContext.customerId);
+                expect(from).toEqual(fromDate);
+                expect(to).toEqual(toDate);
+                return readings;
+            }
+
+            let result = await target.queryReadingsAsync(mockContext, fromDate, toDate);
+            expect(result).toBe(readings);
+            done();
+        });
     
     });
 });
