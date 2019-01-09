@@ -39,13 +39,12 @@ export SHARED_SECRET="shared-secret"
 
 ## Example Usage
 
-### Create a reading
+### Create a reading for customer123
 ```
 curl -X POST \
   http://localhost:3000/api/v1/meter-read \
   -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4LnN0ZXZlbnMiLCJuYW1lIjoiQWxleCBTdGV2ZW5zIiwiaWF0IjoxNTE2MjM5MDIyLCJjdXN0b21lcklkIjoiY3VzdG9tZXIxMjMifQ.w1HaGMsth83_1aLNVMZwcQTIiEOK_BUeENYtDTc3qbM' \
   -H 'Content-Type: application/json' \
-  -H 'Postman-Token: d605e9eb-d4e1-4087-a446-f5a0c067c7f5' \
   -H 'cache-control: no-cache' \
   -d '{
     "serialNumber": "27263927192",
@@ -57,20 +56,26 @@ curl -X POST \
     "readDate": "2019-01-09T20:00:00+00:00"
 }'
 ```
-### Retrieve a specific reading
+### Retrieve a specific reading for customer123
 You may need to tweak the value in the url below to match the `id` returned in the call above
 ```
 curl -X GET \
-  http://localhost:3000/api/v1/meter-read/YXwpNPR8X3Y7EaHTXp0QDA== \
+  http://localhost:3000/api/v1/meter-read/1549p9fposbes4fm7p7uzw802g \
   -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4LnN0ZXZlbnMiLCJuYW1lIjoiQWxleCBTdGV2ZW5zIiwiaWF0IjoxNTE2MjM5MDIyLCJjdXN0b21lcklkIjoiY3VzdG9tZXIxMjMifQ.w1HaGMsth83_1aLNVMZwcQTIiEOK_BUeENYtDTc3qbM' \
-  -H 'Postman-Token: 354b4368-b506-4189-b403-1e1a462edb5a' \
   -H 'cache-control: no-cache'
 ```
-### Retrieve all readings for the customer in context between two dates
+### Retrieve all readings for customer123 in context between two dates
 ```
 curl -X GET \
   'http://localhost:3000/api/v1/meter-read?from=2019-01-01T10:00:00Z&to=2019-01-10T00:00:00Z' \
   -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4LnN0ZXZlbnMiLCJuYW1lIjoiQWxleCBTdGV2ZW5zIiwiaWF0IjoxNTE2MjM5MDIyLCJjdXN0b21lcklkIjoiY3VzdG9tZXIxMjMifQ.w1HaGMsth83_1aLNVMZwcQTIiEOK_BUeENYtDTc3qbM' \
+  -H 'cache-control: no-cache'
+```
+### Retrieve all readings for customer456 in context between two dates (should return empty array)
+```
+curl -X GET \
+  'http://localhost:3000/api/v1/meter-read?from=2019-01-01T10:00:00Z&to=2019-01-10T00:00:00Z' \
+  -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiaWxseS50d2VsdmV0cmVlcyIsIm5hbWUiOiJCaWxseSBUd2VsdmV0cmVlcyIsImlhdCI6MTUxNjIzOTAyMiwiY3VzdG9tZXJJZCI6ImN1c3RvbWVyNDU2In0.kcEnZJrNehoHplRfckR2EM_8j4sZeQjCNDJN4OK-l44' \
   -H 'cache-control: no-cache'
 ```
 ## Other Areas to Explore & Observations
@@ -78,6 +83,7 @@ curl -X GET \
  - I would have attempted to build a "serverless" solution with an AWS Lambda function for the API. I started to do this (you can see my progress on the `serverless-implementation` branch) however, I was hitting issues with running code locally, possibly some misconfigured local setup was causing issues. Primarily though, the learning curve was to high to be able to show what I wanted to (error handling, JWT auth).
  - Add API validation using OpenAPI or Swagger, to ensure the type safety of data and parameters being passed into the API.
  - I would probably consider using something like [AJV](https://www.npmjs.com/package/ajv#filtering-data) to format the reading json being returned by each API - as DynamoDB seems to mutate it slightly when persisting and querying. It is much better to present a consistent payload to consumers.
+ - Add code coverage, typically using istanbul after a test run
 
  ### Valid JWTs:
 - customer123: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4LnN0ZXZlbnMiLCJuYW1lIjoiQWxleCBTdGV2ZW5zIiwiaWF0IjoxNTE2MjM5MDIyLCJjdXN0b21lcklkIjoiY3VzdG9tZXIxMjMifQ.w1HaGMsth83_1aLNVMZwcQTIiEOK_BUeENYtDTc3qbM`
