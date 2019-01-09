@@ -2,7 +2,7 @@
 
 let moment = require("moment");
 let errors = require("../shared/errors.js");
-let crypto = require("crypto").createHash("md5");
+let crypto = require("crypto");
 
 let repo = require("../storage/readingRepo.js");
 
@@ -16,11 +16,22 @@ module.exports = {
     async addReadingAsync(context, reading){
 
         // create a hash from the data to uniquely identify this data
-        let readingDate = moment(reading.readingDate);
-        let hash = crypto.update(`${reading.customerId}|${reading.serialNumber}|${readingDate.unix()}`);
-        let readingId = hash.digest("base64");
+        let readingDate = moment(reading.readDate);
+        if (!readingDate.isValid()){
+            throw new errors.ValidationError([{
+                parameter: "readDate",
+                message: "Dates must be provided in a valid ISO format"
+            }]);
+        }
 
+        let hasher = crypto.createHash("md5");
+        
+        hasher.update(`${reading.customerId}|${reading.serialNumber}|${readingDate.unix()}`);
+        let readingId = hasher.digest("base64");
+        
         reading.id = readingId;
+        reading.customerId = context.customerId;
+        reading.readDate = readingDate.toISOString();
         reading.createdBy = context.sub;
         reading.createdOn = moment().toISOString();
 
@@ -43,6 +54,12 @@ module.exports = {
         return result;
     },
 
+    /**
+     * Retrieves readings between two dates
+     * @param {Object} context - context data identifying the caller
+     * @param {String?} from - ISO date string to query from
+     * @param {String?} to -  ISO date string to query to
+     */
     async getReadingsAsync(context, from, to){
         return await repo.queryReadingsAsync(context.customerId, from, to);
     }

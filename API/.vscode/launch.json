@@ -14,7 +14,11 @@
 				"<node_internals>/**"
 			],
             "env": {
-                "API_PORT": "3000"
+                "API_PORT": "3000",
+                "AWS_ACCESS_KEY_ID": "MyAccessKeyId",
+                "AWS_SECRET_ACCESS_KEY": "mySecretkey",
+                "DYNAMODB_IS_OFFLINE": "true",
+                "DYNAMODB_TABLE": "demoReadings"
             }
         },
         {
@@ -27,7 +31,11 @@
 				"<node_internals>/**"
 			],
             "env": {
-                "API_PORT": "3000"
+                "API_PORT": "3000",
+                "AWS_ACCESS_KEY_ID": "MyAccessKeyId",
+                "AWS_SECRET_ACCESS_KEY": "mySecretkey",
+                "DYNAMODB_IS_OFFLINE": "true",
+                "DYNAMODB_TABLE": "demoReadings"
             }
         }
     ]
