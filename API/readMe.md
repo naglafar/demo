@@ -3,17 +3,13 @@
 I hope this is suitable for your review. If I missed the brief completely, or have misinterpreted anything - please get back in touch as I would welcome the opportunity to rectify. 😄
 
 ## Getting Started:
-- Run `docker run -d --name=dynamodb-local -p 8200:8000 amazon/dynamodb-local` - use `docker rm -f dynamodb-local` to remove
+- Run `docker run -d --name=dynamodb-local -p 8200:8000 amazon/dynamodb-local` (use `docker rm -f dynamodb-local` to remove afterwards)
 - Run `npm install` in the API folder to install dependencies
 - Optionally run `npm test` to execute the test suite
 
 ## Initial Notes
 
 - I took the approach of using a customerId stored in the JWT used to call the API. This is more akin to usage in a production environment. However, there could be a use case where an engineer is adding readings on behalf of a customer using a mobile device. In this scenario, the customerId in the payload would not match, but could be controlled using permissions. However, the engineer's `context.sub` would stamp the record's `createdBy` still.
-- I Considered a more REST compliant API, however I didn't want to stray too far from the brief to include `meter-read` in the route. This would allow for more general use of the API (allowing for other software to consume it at a more business level, controlled by permissions). Example:
-    - POST /customers/:customerId/meters/:serialNumber/readings
-    - GET /customers/:customerId/meters/:serialNumber/readings
-    - GET /customers/:customerId/meters/:serialNumber/readings/:readingId
 - Error Middleware to inspect all errors thrown all the way up and return sensible http status codes (400, 401, 403, 404) based on the error raised
 - Seperation of domain logic from controller to allow easy testing of business logic code
 - Handling of badly formatted dates (all dates are assumed to be in UTC, however the JWT could carry a timezone to allow date conversion in the domain logic)
@@ -22,6 +18,13 @@ I hope this is suitable for your review. If I missed the brief completely, or ha
     - Things like table creation and connection persistence would be abstracted away and not needed to be considered by the developer
     - Client connection could be monitored and reconnected on any transisent errors, allowing a sinble connection to be maintained for the lifetime of the service (or closed and re-established on demand).
     - Testability, easier to test once, not in EVERY repo that consumes it
+
+## Benefits of a more RESTful API???
+- I Considered a more REST compliant API, however I didn't want to stray too far from the brief to include `meter-read` in the route. This would allow for more general use of the API (allowing for other software to consume it at a more business level, controlled by permissions). Example:
+    - POST /customers/:customerId/meters/:serialNumber/readings
+    - GET /customers/:customerId/meters/:serialNumber/readings
+    - GET /customers/:customerId/meters/:serialNumber/readings/:readingId
+- This way would allow for middleware to be added to the route config, that would validate the customerId existed, same for the serialNumber, providing superior validation to each API.
 
 ## Example Usage
 
