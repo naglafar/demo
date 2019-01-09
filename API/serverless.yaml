@@ -1,0 +1,86 @@
+service: serverless-rest-api-with-dynamodb
+
+frameworkVersion: ">=1.1.0 <2.0.0"
+
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
+
+custom:
+  dynamodb:
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+    migration:
+      dir: offline/migrations
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+
+functions:
+
+  verify-token:
+    handler: src/handlers/authHandler.auth
+
+  create:
+    handler: src/handlers/readingHandler.create
+    authorizer: verify-token
+    events:
+      - http:
+          path: meter-read
+          method: post
+          integration: lambda
+          cors: true
+
+  list:
+    handler: src/handlers/readingHandler.list
+    authorizer: verify-token
+    events:
+      - http:
+          path: meter-read
+          method: get
+          integration: lambda
+          cors: true
+
+  get:
+    handler: src/handlers/readingHandler.get
+    authorizer: verify-token
+    events:
+      - http:
+          path: meter-read/{id}
+          method: get
+          integration: lambda
+          cors: true
+
+resources:
+  Resources:
+    TodosDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: id
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}

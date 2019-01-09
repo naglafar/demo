@@ -2,23 +2,27 @@
   "name": "demo",
   "version": "1.0.0",
   "description": "Demonstration of back-end skills and approach",
-  "main": "src/index.js",
   "scripts": {
-    "start": "node src/app.local.js",
+    "start": "./node_modules/.bin/serverless offline",
+    "debug": "export SLS_DEBUG=* && node --inspect ./node_modules/.bin/serverless offline",
     "test": "./node_modules/.bin/jasmine"
   },
   "author": "Alex Stevens",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.384.0",
     "bluebird": "^3.5.3",
     "express": "^4.16.4",
     "express-jwt": "^5.3.1",
     "moment": "^2.22.2",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "serverless": "^1.35.1",
+    "serverless-dynamodb-local": "^0.2.30"
   },
   "devDependencies": {
     "jasmine": "^3.3.0",
     "mockery": "^2.1.0",
-    "rewire": "^4.0.1"
+    "rewire": "^4.0.1",
+    "serverless-offline": "^3.32.1"
   }
 }

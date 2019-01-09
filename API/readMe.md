@@ -5,7 +5,7 @@ Add
     - GET customers/customer123/meters/meter1/readings
 - Try to consume AWS products
 - https://medium.freecodecamp.org/express-js-and-aws-lambda-a-serverless-love-story-7c77ba0eaa35
-
+- https://github.com/serverless/examples/tree/master/aws-node-rest-api-with-dynamodb-and-offline
 
 Getting Started:
 - Run `npm install` in the API folder

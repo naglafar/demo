@@ -29,6 +29,17 @@
             "env": {
                 "API_PORT": "3000"
             }
+        },
+        {
+            "name": "Launch Serverless Debug",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run-script",
+                "debug"
+            ],
+            "port": 3000
         }
     ]
 }
